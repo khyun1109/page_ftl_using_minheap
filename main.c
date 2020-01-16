@@ -83,7 +83,7 @@ int main(int argc, char *argv[]){
 
 			/* Trace check */
 			//if(cycle>0){	
-			if(trace_key == 0){
+			if(trace_key%5 == 0){
 				printf("type: %c, key: %d, value: %d\n", *buf, trace_key, trace_value);
 			}
 			/* Implement your page_write function */
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]){
 			fread((void*)&trace_key, 4, 1, fp);
 			
 			/* Trace check */
-			if(cycle>0){
+			if(trace_key%5 == 0){
 				printf("type: %c, key: %d, value: %d\n", *buf, trace_key, trace_value);
 			}
 			/* Implement your page_read function */

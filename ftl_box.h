@@ -26,6 +26,7 @@
 typedef struct flash_block {
 	int32_t min_page;
 	int32_t *pages;
+	int32_t *parent;
 	int32_t erase_cnt;
 	int32_t valid_num;
 } _flash_block;
@@ -84,11 +85,12 @@ static inline void write_collision(int32_t b_idx, int32_t p_idx) {
 
 int32_t box_create();
 int32_t box_destroy();
-int32_t flash_page_write(int32_t b_idx, int32_t p_idx, int32_t value);
+int32_t flash_page_write(int32_t b_idx, int32_t p_idx, int32_t value, int32_t trace_key);
 int32_t flash_page_read(int32_t b_idx, int32_t p_idx);
 int32_t flash_block_erase(int32_t b_idx);
 int32_t page_read(int32_t trace_key);
 int page_write(int trace_key, int trace_value);
+void copy_paste_block(int block_num);
 int32_t last_block;
 int32_t last_page;
 int cycle;
