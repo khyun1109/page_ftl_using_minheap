@@ -101,4 +101,6 @@ void buildMinHeap(minHeap *hp, _flash_block *block, int size);
 void insertNode(minHeap *hp, int data, int num);
 void deleteNode(minHeap *hp);
 void deleteMinHeap(minHeap *hp);
+int free_num;
+void inorderTraversal(minHeap *hp, int i);
 #endif // !__H_FTL_BOX__

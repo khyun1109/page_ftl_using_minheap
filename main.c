@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
 	FILE * fp;
 	char *buf;
 	int trace_key, trace_value;
-
+	free_num = NOB-1;
 	if (argc > 2 || argc <= 1) {
 		puts("argument error");
 		abort();
@@ -83,9 +83,11 @@ int main(int argc, char *argv[]){
 
 			/* Trace check */
 			//if(cycle>0){	
-			if(trace_key%5 == 0){
-				printf("type: %c, key: %d, value: %d\n", *buf, trace_key, trace_value);
+			if(trace_key == 0){
+			//	printf("type: %c, key: %d, value: %d\n", *buf, trace_key, trace_value);
+				printf("0!!\n");
 			}
+		
 			/* Implement your page_write function */
 			page_write(trace_key, trace_value);
 		}
@@ -93,8 +95,9 @@ int main(int argc, char *argv[]){
 			fread((void*)&trace_key, 4, 1, fp);
 			
 			/* Trace check */
-			if(trace_key%5 == 0){
-				printf("type: %c, key: %d, value: %d\n", *buf, trace_key, trace_value);
+			if(trace_key == 0){
+			//	printf("type: %c, key: %d, value: %d\n", *buf, trace_key, trace_value);
+				printf("0!!\n");
 			}
 			/* Implement your page_read function */
 			page_read(trace_key);

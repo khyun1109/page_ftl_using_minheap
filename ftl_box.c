@@ -17,7 +17,7 @@ int32_t box_create() {
 		flash_blocks[i].pages = (int32_t*)malloc(sizeof(int32_t) * PPB);
 		flash_blocks[i].parent = (int32_t*)malloc(sizeof(int32_t) * PPB);
 		memset(flash_blocks[i].pages, 0xff, sizeof(int32_t) * PPB);
-		memset(flash_blocks[i].pages, 0xff, sizeof(int32_t * PPB);
+		memset(flash_blocks[i].pages, 0xff, sizeof(int32_t) * PPB);
 		flash_blocks[i].valid_num = 0;
 	}
 }
@@ -69,6 +69,20 @@ void buildMinHeap(minHeap *hp, _flash_block *block, int size){
     }
 }
 
+
+void inorderTraversal(minHeap *hp, int i) {
+    if(LCHILD(i) < hp->size) {
+        inorderTraversal(hp, LCHILD(i)) ;
+    }
+	if(flash_blocks[hp->elem[i].num].valid_num != hp->elem[i].data){
+		hp->elem[i].data = flash_blocks[hp->elem[i].num].valid_num;
+		heapify(hp, i);
+	}
+    if(RCHILD(i) < hp->size) {
+        inorderTraversal(hp, RCHILD(i)) ;
+    }
+}
+
 void insertNode(minHeap *hp, int data, int num){
 	if(hp->size) {
         hp->elem = realloc(hp->elem, (hp->size + 1) * sizeof(node)) ;
@@ -104,19 +118,17 @@ void deleteNode(minHeap *hp){
 void copy_paste_block(int block_num){
 	last_block = block_num;
 	for(int i = 0; i < PPB; i++){
-		int32_t a = flash_block[block_num].parent[i];
+		int32_t a = flash_blocks[block_num].parent[i];
 		if(dict.block_num[a] == block_num){//this is valid page.
 			if(dict.page_num[a] == i){
-				flash_page_write(NOB-1, last_page, flash_block[block_num].pages[i],a);
+				flash_page_write(free_num, last_page, flash_blocks[block_num].pages[i],a);
 				last_page += 1;
 			}
 		}
 	}
 	flash_block_erase(block_num);
-	for(int i = 0; i < last_page; i++){
-		flash_page_write(block_num, i, flash_block[NOB-1].pages[i],flash_block[NOB-1].parent[i]);
-	}
-	flash_block_erase(NOB-1);	
+	last_block = free_num;
+	free_num = block_num;
 }
 
 void deleteMinHeap(minHeap *hp){
@@ -148,7 +160,7 @@ int32_t flash_block_erase(int32_t b_idx) {
 	range_check(b_idx, NIL, BLOCK_ERASE);
 	flash_blocks[b_idx].min_page = -1;
 	memset(flash_blocks[b_idx].pages, 0xff, sizeof(int32_t) * PPB); // Initiailize with -1
-	memset(flash_blocks[b_idx].parents, 0xff, sizeof(int32_t) * PPB);
+	memset(flash_blocks[b_idx].parent, 0xff, sizeof(int32_t) * PPB);
 	flash_blocks[b_idx].valid_num = 0;
 	return 1;
 }
@@ -176,6 +188,7 @@ int32_t page_write(int32_t trace_key, int32_t trace_value){ //using hash
 			if(last_block == NOB -1){
 				cycle = 1;
 				buildMinHeap(&hp, flash_blocks, NOB-1);
+				printf("build Complete!\n");
 				last_block = 0;
 				last_page = 0;
 				deleteNode(&hp);
@@ -183,10 +196,19 @@ int32_t page_write(int32_t trace_key, int32_t trace_value){ //using hash
 		}
 	}
 	else{ // when blocks become full -> cycle == 1
+		flash_blocks[dict.block_num[trace_key]].valid_num -= 1;
+		dict.block_num[trace_key] = last_block;
+		dict.page_num[trace_key] = last_page;
+		flash_page_write(last_block, last_page, trace_value, trace_key);
+		last_page += 1;
 		if(last_page == 128){
+			inorderTraversal(&hp, 0);
+			insertNode(&hp, 128, last_block);	
+			last_block = 0;
+			last_page = 0;
+			deleteNode(&hp);
 			
 		}
-		sleep(1);
 	}
 }
 
